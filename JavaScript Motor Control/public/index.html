@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        
+        <style>
+            body {
+                text-align: center;
+            }
+
+            p {
+                font-size: 17px;
+                line-height: 1.5;
+            }
+
+            ul {
+                list-style-position: inside;
+            }
+
+            .grp {
+                display: inline-block;
+                vertical-align: middle;
+            }
+
+            .button {
+                border: none;
+                color: white;
+                padding: 16px 32px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 4px 2px;
+                transition-duration: 0.4s;
+                cursor: pointer;
+            }
+
+            .button1 {
+                background-color: white;
+                color: black;
+                border: 2px solid #008554;
+            }
+
+            .button1:hover {
+                background-color: #11bd7e;
+                color: white;
+            }
+
+            .button1:active {
+                background-color: #009c63;
+            }
+
+            .button2 {
+                background-color: white;
+                color: black;
+                border: 2px solid #850000;
+            }
+
+            .button2:hover {
+                background-color: #bd1111;
+                color: white;
+            }
+
+            .button2:active {
+                background-color: #9c0000;
+            }
+
+            .checkmark {
+                height: 20px;
+                width: 20px;
+                background-color: #eee;
+            }
+
+            .checkmark:hover {
+                background-color: #ccc;
+            }
+        </style>
+
+        <title>Motor Controller</title>
+    </head>
+    <body>
+        <h1>Motor Controller</h1>
+        <hr>
+
+        <!-- Button and Toggle for instant control -->
+        <h3>Instantaneous Control</h3>
+        <button type="button" id="on-button" class="button1">ON</button>
+        <button type="button" id="off-button" class="button2">OFF</button>
+        <br>
+        <div class="grp">
+            <input type="checkbox" id="checkmark" class="checkmark">
+        </div>
+        <div class="grp">
+            <p>Keep the motor on</p>
+        </div>
+        <hr>
+
+        <!-- Field enterable time based controls -->
+        <h3>Time Based Controls</h3>
+        <ul>
+            
+        </ul>
+        Select Time: <input type="time" id="time"> 
+        <br>
+        
+        <div class="grp">
+            <input type="text" class="float" id="feed" size="5" placeholder="0">
+        </div>
+        <div class="grp">
+            <p>Amount of Feed (sec)</p>
+        </div>
+        <br>
+        
+        <input type="submit" id="submit" value="Submit">
+
+        <!-- include socket.io client side script and jquery -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+        <script>
+            var socket = io(); // Load socket.io-client and connect to the host that serves the page
+            var listcount = 0; // For next list item id
+            var head = 1;      // For current top of the list item
+            
+            // When page loads
+            window.addEventListener("load", function(){ 
+                /* Instantaneous Control */
+                var onbutton = document.getElementById("on-button");
+                // Add event listener for when button is pressed
+                onbutton.addEventListener("mousedown", function() { 
+                    // Send a 1 to the server
+                    socket.emit("on-button", 1); 
+                });
+                // Add event listener for when button is released
+                onbutton.addEventListener("mouseup", function() { 
+                    // Send a 0 to the server
+                    socket.emit("on-button", 0);
+                });
+
+                var offbutton = document.getElementById("off-button");
+                // Add event listener for when button is clicked
+                offbutton.addEventListener("click", function() { 
+                    socket.emit("off-button", 0); // Send 0 to the server
+                    
+                    // Ensure that the checkbox is also unchecked when off button pressed
+                    let checkbox = document.getElementById('checkmark');
+                    if (checkbox.checked) checkbox.checked = false;
+                });
+
+                var checkmark = document.getElementById("checkmark");
+                // Add event listener for when the checkbox changes
+                checkmark.addEventListener("change", function() { 
+                    // Send checkbox status to server (as 1 or 0)
+                    socket.emit("checkmark", Number(this.checked)); 
+                });
+
+                /* Time Based Control */
+                // Ensure that the input can only be an integer or float
+                $('input.float').on('input', function() {
+                    this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');
+                });
+
+                // When submit is pressed, get the entries and emit the data
+                document.getElementById('submit').onclick = () => {
+                    const amt_time = document.getElementById('feed').value; // grab the amount of feed
+                    const wht_time = document.getElementById('time').value; // grab the time
+                    
+                    // Check to ensure there was an amount of feed specified
+                    if (amt_time > 0) {
+                        socket.emit('feeding', amt_time, wht_time);
+                    }
+                    // Reset the entries
+                    document.getElementById('feed').value = null; 
+                    document.getElementById('time').value = null;
+                }
+
+                // If a feeding is submitted, add it to the list
+                socket.on('feeding', amt_time => {
+                    listcount++;
+                    const el = document.createElement('li');
+                    el.setAttribute('id', listcount);
+                    el.innerHTML = amt_time;
+                    document.querySelector('ul').appendChild(el);
+                });
+
+                // Remove the current top of the list
+                socket.on('rm_head', function() {
+                    var ol = document.querySelector('ol');
+                    var li = document.getElementById(head);
+                    ol.removeChild(li);
+                    head++;
+                });
+            });
+        </script>
+    </body>
+</html>
