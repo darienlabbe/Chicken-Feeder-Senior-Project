@@ -1,0 +1,8 @@
+{
+  "short_name": "Motor Controller",
+  "name": "Allow For Controlling A Motor To Feed Chickens",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
