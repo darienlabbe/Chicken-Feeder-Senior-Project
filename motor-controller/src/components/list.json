@@ -1,0 +1,29 @@
+[
+    {
+        "value": "Run Once"
+    },
+    {
+        "value": "Everyday"
+    },
+    {
+        "value": "Every Other Day"
+    },
+    {
+        "value": "Once Every Week"
+    },
+    {
+        "value": "Once Every Other Week"
+    },
+    {
+        "value": "Once Every Month"
+    },
+    {
+        "value": "Once Every Other Month"
+    },
+    {
+        "value": "Once Every 6 Months"
+    },
+    {
+        "value": "Once A Year"
+    }
+]
