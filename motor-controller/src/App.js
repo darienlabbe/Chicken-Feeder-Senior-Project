@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
 import Calendar from "./components/calendar";
-import Menu from "./components/menu";
+import AddEvent from "./components/add-event";
 import { io } from "socket.io-client";
+import DeleteEvent from "./components/delete-event";
 
 const socket = io("http://localhost:3001");
 
@@ -9,7 +10,7 @@ function App() {
   useEffect(() => {
     // Event listener
     socket.on('connect', () => {
-      // Recieve message from the server
+      // Receive message from the server
       socket.on("user connected", (data) => {
         console.log("Server: ", data);
       });
@@ -26,8 +27,13 @@ function App() {
       <div className="flex items-center justify-center min-w-0 min-h-28 border-b-4">
         <h1 className="text-4xl font-bold text-gray-900">Motor Controller</h1>
       </div>
-      <div className="grid justify-center">
-        <Menu/>
+      <div className="flex justify-center">
+        <div className="flex px-1">
+          <AddEvent/> 
+        </div>
+        <div className="flex px-1">
+          <DeleteEvent/> 
+        </div>
       </div>
       <div>
         <Calendar/>
