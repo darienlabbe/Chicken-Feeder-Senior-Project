@@ -27,6 +27,7 @@ const db = mysql.createPool({
     database: process.env.MYSQL_DATABASE
 }).promise();
 
+// Function to add a record to the events table 
 async function createEvent(recure_interval, st_day, st_time, end_day, amt_feed) {
     const [result] = await db.query(`
         INSERT INTO events (recure_interval, st_day, st_time, end_day, amt_feed)
@@ -35,7 +36,8 @@ async function createEvent(recure_interval, st_day, st_time, end_day, amt_feed) 
     return result;
 }
 
-async function createOccurrence(id, run_date, run_time, amt_feed) {
+// Function to add a record to the occurences table
+async function createOccurence(id, run_date, run_time, amt_feed) {
     const [result] = await db.query(`
         Insert INTO occurences (id, run_date, run_time, amt_feed) 
         values (?, ?, ?, ?)
@@ -89,7 +91,7 @@ io.on("connection", (socket) => {
                 // Calculate and input occurence(s)
                 id = Object.values(insert_r1)[2];
                 console.log("id: ", id);
-                const insert_o_r1 = await createOccurrence(id, st_day, st_time, amount);
+                const insert_o_r1 = await createOccurence(id, st_day, st_time, amount);
                 console.log(insert_o_r1);
                 break;
             case "Everyday":
@@ -101,7 +103,7 @@ io.on("connection", (socket) => {
                 end_day = new dayjs(e_day);
                 for (let i = new dayjs(st_day); i <= end_day; i = i.add(1, 'day')) {
                     let new_date = i.toISOString().split('T')[0];
-                    const insert_o_ed = await createOccurrence(id, new_date, st_time, amount);
+                    const insert_o_ed = await createOccurence(id, new_date, st_time, amount);
                     console.log(insert_o_ed);
                 }
                 break;
@@ -114,7 +116,7 @@ io.on("connection", (socket) => {
                 end_day = new dayjs(e_day);
                 for (let i = new dayjs(st_day); i <= end_day; i = i.add(2, 'day')) {
                     let new_date = i.toISOString().split('T')[0];
-                    const insert_o_eod = await createOccurrence(id, new_date, st_time, amount);
+                    const insert_o_eod = await createOccurence(id, new_date, st_time, amount);
                     console.log(insert_o_eod);
                 }
                 break;
@@ -127,7 +129,7 @@ io.on("connection", (socket) => {
                 end_day = new dayjs(e_day);
                 for (let i = new dayjs(st_day); i <= end_day; i = i.add(1, 'week')) {
                     let new_date = i.toISOString().split('T')[0];
-                    const insert_o_ew = await createOccurrence(id, new_date, st_time, amount);
+                    const insert_o_ew = await createOccurence(id, new_date, st_time, amount);
                     console.log(insert_o_ew);
                 }
                 break;
@@ -140,7 +142,7 @@ io.on("connection", (socket) => {
                 end_day = new dayjs(e_day);
                 for (let i = new dayjs(st_day); i <= end_day; i = i.add(2, 'week')) {
                     let new_date = i.toISOString().split('T')[0];
-                    const insert_o_eow = await createOccurrence(id, new_date, st_time, amount);
+                    const insert_o_eow = await createOccurence(id, new_date, st_time, amount);
                     console.log(insert_o_eow);
                 }
                 break;
@@ -153,7 +155,7 @@ io.on("connection", (socket) => {
                 end_day = new dayjs(e_day);
                 for (let i = new dayjs(st_day); i <= end_day; i = i.add(1, 'month')) {
                     let new_date = i.toISOString().split('T')[0];
-                    const insert_o_em = await createOccurrence(id, new_date, st_time, amount);
+                    const insert_o_em = await createOccurence(id, new_date, st_time, amount);
                     console.log(insert_o_em);
                 }
                 break;
@@ -166,7 +168,7 @@ io.on("connection", (socket) => {
                 end_day = new dayjs(e_day);
                 for (let i = new dayjs(st_day); i <= end_day; i = i.add(2, 'month')) {
                     let new_date = i.toISOString().split('T')[0];
-                    const insert_o_eom = await createOccurrence(id, new_date, st_time, amount);
+                    const insert_o_eom = await createOccurence(id, new_date, st_time, amount);
                     console.log(insert_o_eom);
                 }
                 break;
@@ -179,7 +181,7 @@ io.on("connection", (socket) => {
                 end_day = new dayjs(e_day);
                 for (let i = new dayjs(st_day); i <= end_day; i = i.add(6, 'month')) {
                     let new_date = i.toISOString().split('T')[0];
-                    const insert_o_e6m = await createOccurrence(id, new_date, st_time, amount);
+                    const insert_o_e6m = await createOccurence(id, new_date, st_time, amount);
                     console.log(insert_o_e6m);
                 }
                 break;
@@ -192,7 +194,7 @@ io.on("connection", (socket) => {
                 end_day = new dayjs(e_day);
                 for (let i = new dayjs(st_day); i <= end_day; i = i.add(1, 'year')) {
                     let new_date = i.toISOString().split('T')[0];
-                    const insert_o_y = await createOccurrence(id, new_date, st_time, amount);
+                    const insert_o_y = await createOccurence(id, new_date, st_time, amount);
                     console.log(insert_o_y);
                 }
                 break;
