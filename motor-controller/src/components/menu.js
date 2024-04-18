@@ -15,46 +15,68 @@ import {
 const socket = io("http://localhost:3001");
 
 function Menu() {
+    // States for changing inputs and different style changes
     const [isDisImm, setDisImm] = useState(false);
     const [isDisRep, setDisRep] = useState(false);
+    const [isDateError, setDateError] = useState(false);
+    const [isDropError, setDropError] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [dropValue, setDropValue] = useState("--select one--");
 
+    // Function for submiting the data to the backend
     function onSubmit () {
+        // Check that a recurrence interval value was selected 
         if (dropValue !== "--select one--") {
-            // Get values
+            setDropError(false);
+
+            // Get values from the inputs
             let start_day = document.getElementById('start_day').value;
             let start_time = document.getElementById('start_time').value;
             let end_day = document.getElementById('end_day').value;
-            let end_time = document.getElementById('end_time').value;
             let amt = document.getElementById('amt').value;
+            
+            // Array of data to be sent to backend
+            let all_data = [isDisImm, isDisRep, dropValue, "", "", "", ""];
 
-            // Send information to backend
-            socket.emit("recure_interval", dropValue);
-            if (!isDisImm) {
-                if (start_day !== "") socket.emit("start_day", start_day);
-                if (start_time !== "") socket.emit("start_time", start_time);
+            // Check to determine if the end date occurs before the start date
+            if (start_day !== "" && end_day !== "") {
+                let date1 = new Date(start_day);
+                let date2 = new Date(end_day);
+                if (date1 > date2) {
+                    console.error("YOU MUST INPUT A START DATE THAT OCCURS BEFORE THE END DATE");
+                    setDateError(true);
+                    return;
+                } 
             }
             
-            if (!isDisRep) {
-                if (end_day !== "") socket.emit("end_day", end_day);
-                if (end_time !== "") socket.emit("end_time", end_time);
+            // Add data to array
+            if (!isDisImm) {
+                if (start_day !== "") all_data[3] = start_day;
+                if (start_time !== "") all_data[4] = start_time;
             }
-
-            if (amt > 0) socket.emit("amt", amt);
+            if (!isDisRep && end_day !== "") {
+                all_data[5] = end_day;
+            }
+            if (amt > 0) all_data[6] = amt;
+            
+            // Send information to backend
+            socket.emit("new_feeding", all_data);
+            
+            // Reset input values
+            document.getElementById('start_day').value = "";
+            document.getElementById('start_time').value = "";
+            document.getElementById('end_day').value = "";
+            document.getElementById('amt').value = null;
+            setDropValue("--select one--");
+            setDateError(false);
         } else {
             console.log("ERROR: Input a recurrence interval!")
+            setDropError(true);
+            setDateError(false);
         }
-
-        // Reset input values
-        document.getElementById('start_day').value = "";
-        document.getElementById('start_time').value = "";
-        document.getElementById('end_day').value = "";
-        document.getElementById('end_time').value = "";
-        document.getElementById('amt').value = null;
-        setDropValue("--select one--");
     }
 
+    // Function for changing the value of the recurrence interval dropdown
     function drop(item) {
         setDropValue((val) => val = item);
         setIsOpen((prev) => !prev);
@@ -90,7 +112,7 @@ function Menu() {
                             <h1 className="font-bold">Select Recurrence Interval:</h1>
                         </div>
                         <div className="relative flex p-1 h-12">
-                            <button id="drop" onClick={() => setIsOpen((prev) => !prev)} className="text-gray-500 flex flex-row items-center justify-between px-4 bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full">{dropValue} {!isOpen ? (<AiOutlineCaretDown className="h-8"/>): (<AiOutlineCaretUp className="h-8"/>)}</button>
+                            <button id="drop" onClick={() => setIsOpen((prev) => !prev)} className={cn(isDropError?"ring-red-500 border-red-500":"focus:ring-blue-500 focus:border-blue-500","text-gray-500 flex flex-row items-center justify-between px-4 bg-gray-50 border border-gray-300 rounded-lg w-full")}>{dropValue} {!isOpen ? (<AiOutlineCaretDown className="h-8"/>): (<AiOutlineCaretUp className="h-8"/>)}</button>
                             {isOpen && (<div className="bg-gray-50 border border-gray-300 absolute top-11 flex flex-col items-start rounded-lg p-2 w-full">
                                 {list.map((item, i) => (
                                     <div className="flex w-full p-1 hover:font-bold cursor-pointer" key={i}>
@@ -106,7 +128,7 @@ function Menu() {
                                 <h1 className="font-bold">Select Start Day For Feeding:</h1>
                             </div>
                             <div className="flex p-1">
-                                <input id="start_day" disabled={isDisImm} type="date" min={new Date().toISOString().split("T")[0]} className={cn(isDisImm?"text-gray-300":"text-gray-500", "bg-gray-50 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full",)}/>
+                                <input id="start_day" disabled={isDisImm} type="date" min={new Date().toISOString().split("T")[0]} className={cn(isDateError?"ring-red-500 border-red-500":"focus:ring-blue-500 focus:border-blue-500", isDisImm?"text-gray-300":"text-gray-500", "bg-gray-50 border-gray-300 rounded-lg w-full",)}/>
                             </div>
                         </div>
                         <div>
@@ -124,15 +146,7 @@ function Menu() {
                                 <h1 className="font-bold">Select End Day For Feeding:</h1>
                             </div>
                             <div className="flex p-1">
-                                <input id="end_day" disabled={isDisRep} type="date" min={new Date().toISOString().split("T")[0]} className={cn(isDisRep?"text-gray-300":"text-gray-500", "bg-gray-50 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full",)}/>
-                            </div>
-                        </div>
-                        <div>
-                            <div className="p-2">
-                                <h1 className="font-bold">Select End Time:</h1>
-                            </div>
-                            <div>
-                                <input id="end_time" disabled={isDisRep} type="time" className={cn(isDisRep?"text-gray-300":"text-gray-500", "bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full",)}/>
+                                <input id="end_day" disabled={isDisRep} type="date" min={new Date().toISOString().split("T")[0]} className={cn(isDateError?"ring-red-500 border-red-500":"focus:ring-blue-500 focus:border-blue-500", isDisRep?"text-gray-300":"text-gray-500", "bg-gray-50 border-gray-300 rounded-lg w-full",)}/>
                             </div>
                         </div>
                     </div>
