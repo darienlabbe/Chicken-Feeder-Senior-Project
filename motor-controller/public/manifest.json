@@ -1,6 +1,33 @@
 {
   "short_name": "Motor Controller",
-  "name": "Allow For Controlling A Motor To Feed Chickens",
+  "name": "Web App For Controlling A Motor To Feed Chickens Automatically",
+  "icons": [
+    {
+      "src": "images/196.png",
+      "sizes": "196x196",
+      "type": "image/png"
+    }, 
+    {
+      "src": "images/216.png",
+      "sizes": "216x216",
+      "type": "image/png"
+    }, 
+    {
+      "src": "images/256.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    }, 
+    {
+      "src": "images/512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }, 
+    {
+      "src": "images/1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png"
+    }
+  ], 
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",
