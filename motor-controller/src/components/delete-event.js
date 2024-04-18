@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AiOutlineCaretUp, AiOutlineCaretDown } from 'react-icons/ai';
+import { AiOutlineCaretUp, AiOutlineCaretDown, AiOutlineMinus } from 'react-icons/ai';
 import cn from './cn';
 import list from "./list.json"
 import { io } from "socket.io-client";
@@ -90,11 +90,9 @@ function DeleteEvent() {
             unmount: { scale: 0, y: 25 },
             }}>
             <PopoverHandler>
-                <Button className="bg-red-600 flex items-center p-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-6 h-6">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                    <h1 className="p-2">Delete A Feeding</h1>
+                <Button className="bg-red-600 flex items-center p-2">
+                    <AiOutlineMinus className="w-5 h-5"/>
+                    <h1 className="p-1">Delete A Feeding</h1>
                 </Button>
             </PopoverHandler>
             <PopoverContent>
