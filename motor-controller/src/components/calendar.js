@@ -2,13 +2,24 @@ import React, { useState } from "react";
 import { generateDate, months } from "./calendar-logic";
 import { GrFormNext, GrFormPrevious } from "react-icons/gr"
 import cn from "./cn";
+import occur from "./occurrence-list.json"
 import dayjs from "dayjs";
+import utc from 'dayjs/plugin/utc.js';
+import tz from 'dayjs/plugin/timezone.js';
+
+// For converting timezone
+dayjs.extend(utc);
+dayjs.extend(tz);
+dayjs.tz.setDefault("America/Los_Angeles");
 
 function Calendar() {
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const currentDate = dayjs();
+  const currentDate = dayjs.tz();
   const [today, setToday] = useState(currentDate);
   const [selectDate, setSelectDate] = useState(currentDate);
+  
+  // For correct date format for comparison
+  var select_date = selectDate.toDate().getFullYear() + '-' + (selectDate.toDate().getMonth() + 1).toString().padStart(2, "0") + '-' + selectDate.toDate().getDate().toString().padStart(2, "0");
   
   return (
     <div className="grid divide-y-2 gap-8 items-center justify-center">
@@ -48,10 +59,19 @@ function Calendar() {
       </div>
       <div className="w-72 h-72 text-sm pt-3">
         <h1 className="font-semibold pb-1 border-b">Scheduled Feedings for {selectDate.toDate().toDateString()}</h1>
-        <p className="pt-2">No feedings scheduled today.</p>
+        {occur.some(item => item.run_date.split('T')[0] === select_date) ? 
+          (<ul className="pt-2 px-5 list-disc">
+            {occur.filter(item => item.run_date.split('T')[0] === select_date)
+              .map((item) => (<li key={item.id}>Feeding at {
+                item.run_time.split(':')[0] >= 13 ? item.run_time.split(':')[0] - 12 + ":" + item.run_time.split(':')[1] + "pm" :
+                (item.run_time.split(':')[0] < 10 ? (item.run_time.split(':')[0] === "00" ? "12" : item.run_time.split(':')[0].split('0')[1]) : item.run_time.split(':')[0])
+                + ":" + item.run_time.split(':')[1] + "am"} for {item.amt_feed} seconds</li>))
+            }</ul>)
+          : (<p className="pt-2">No feedings scheduled today.</p>)
+        }
       </div>
     </div>
   );
 }
-
+// "Feeding at: " + occur[i].run_time + " for " + occur[i].amt_feed + " seconds"
 export default Calendar;

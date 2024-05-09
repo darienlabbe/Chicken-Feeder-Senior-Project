@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
 import Calendar from "./components/calendar";
 import AddEvent from "./components/add-event";
-import { io } from "socket.io-client";
 import DeleteEvent from "./components/delete-event";
+import { io } from "socket.io-client";
 
 const socket = io("http://localhost:3001");
 

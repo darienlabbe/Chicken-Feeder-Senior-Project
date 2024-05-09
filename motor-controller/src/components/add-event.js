@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { AiOutlineCaretUp, AiOutlineCaretDown, AiOutlinePlus } from 'react-icons/ai';
+import { AiOutlineCaretUp, AiOutlineCaretDown } from 'react-icons/ai';
+import { FaPlus } from 'react-icons/fa6';
 import cn from './cn';
 import list from "./list.json"
 import { io } from "socket.io-client";
@@ -7,10 +8,17 @@ import {
     Popover,
     PopoverHandler,
     PopoverContent,
-    Button,
-    Checkbox,
-    Typography
+    Button
 } from '@material-tailwind/react';
+import dayjs from "dayjs";
+import utc from 'dayjs/plugin/utc.js';
+import tz from 'dayjs/plugin/timezone.js';
+import Loading from "./loading";
+
+// For converting timezone
+dayjs.extend(utc);
+dayjs.extend(tz);
+dayjs.tz.setDefault("America/Los_Angeles");
 
 const socket = io("http://localhost:3001");
 
@@ -22,6 +30,12 @@ function AddEvent() {
     const [isDropError, setDropError] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [dropValue, setDropValue] = useState("--select one--");
+    const [isLoading, setLoading] = useState(false);
+
+    socket.on("loading", () => { setLoading(true); });
+    socket.on("done_loading", () => { setLoading(false); });
+
+    const currentDate = dayjs.tz().get('year') + '-' + (dayjs.tz().get('month') + 1).toString().padStart(2, '0') + '-' + dayjs.tz().get('date').toString().padStart(2, '0');
 
     // Function for submitting the data to the backend
     function onSubmit () {
@@ -40,10 +54,10 @@ function AddEvent() {
 
             // Check to determine if the end date occurs before the start date
             if (start_day !== "" && end_day !== "") {
-                let date1 = new Date(start_day);
-                let date2 = new Date(end_day);
+                let date1 = dayjs.tz().set('year', start_day.split('-')[0]).set('month', start_day.split('-')[1] - 1).set('date', start_day.split('-')[2]);
+                let date2 = dayjs.tz().set('year', end_day.split('-')[0]).set('month', end_day.split('-')[1] - 1).set('date', end_day.split('-')[2]);
                 if (date1 > date2) {
-                    console.error("YOU MUST INPUT A START DATE THAT OCCURS BEFORE THE END DATE");
+                    console.error("ERROR: You must input a start date that occurs before the end date!");
                     setDateError(true);
                     return;
                 } 
@@ -70,7 +84,7 @@ function AddEvent() {
             setDropValue("--select one--");
             setDateError(false);
         } else {
-            console.log("ERROR: Input a recurrence interval!")
+            console.error("ERROR: Input a recurrence interval!")
             setDropError(true);
             setDateError(false);
         }
@@ -84,25 +98,28 @@ function AddEvent() {
     
     return (
         <Popover 
-            placement="bottom"
+            placement="bottom-start"
             animate={{
-            mount: { scale: 1, y: 0 },
-            unmount: { scale: 0, y: 25 },
+                mount: { scale: 0.80, x: -30, y: -75 },
+                unmount: { scale: 0, x: -70, y: -385 },
             }}>
+            {isLoading?(<Loading/>):""}
             <PopoverHandler>
-                <Button className="bg-red-600 flex items-center p-2">
-                    <AiOutlinePlus className="w-5 h-5"/>
+                <Button onClick={() => setDisImm(false)} className="bg-red-600 flex items-center p-2">
+                    <FaPlus className="w-5 h-5 "/>
                     <h1 className="p-1">Add New Feeding</h1>
                 </Button>
             </PopoverHandler>
             <PopoverContent>
-                <div className="p-4 grid grid-cols-1">
-                    <div className="p-4 border-b">
-                        <div>
-                            <Checkbox id="run_imm" onClick={() => setDisImm(!isDisImm)} label={<Typography className="font-bold">Run Immediately</Typography>}/>
+                <div className="px-3 grid grid-cols-1">
+                    <div className="p-4 border-b grid grid-cols-1">
+                        <div className="relative flex px-4 items-center">
+                            <input type="checkbox" id="run_imm" checked={isDisImm} className="flex rounded p-2 checked:bg-red-700" onChange={() => setDisImm(!isDisImm)}/> 
+                            <label className="flex text-gray-700 text-lg font-bold px-4">Run Immediately</label>
                         </div>
-                        <div>
-                            <Checkbox id="repeat_f" onClick={() => setDisRep(!isDisRep)} label={<Typography className="font-bold">Repeat Forever</Typography>}/>
+                        <div className="relative flex px-4 pt-2 items-center">
+                            <input type="checkbox" id="repeat_f" checked={isDisRep} className="flex rounded p-2 checked:bg-red-700" onChange={() => setDisRep(!isDisRep)}/> 
+                            <label className="flex text-gray-700 text-lg font-bold px-4">Repeat Forever</label>
                         </div>
                     </div>
                     <div className="p-4 border-b">
@@ -126,7 +143,7 @@ function AddEvent() {
                                 <h1 className="font-bold">Select Start Day For Feeding:</h1>
                             </div>
                             <div className="flex p-1">
-                                <input id="start_day" disabled={isDisImm} type="date" min={new Date().toISOString().split("T")[0]} className={cn(isDateError?"ring-red-500 border-red-500":"focus:ring-blue-500 focus:border-blue-500", isDisImm?"text-gray-300":"text-gray-500", "bg-gray-50 border-gray-300 rounded-lg w-full",)}/>
+                                <input id="start_day" disabled={isDisImm} type="date" min={currentDate} className={cn(isDateError?"ring-red-500 border-red-500":"focus:ring-blue-500 focus:border-blue-500", isDisImm?"text-gray-300":"text-gray-500", "bg-gray-50 border-gray-300 rounded-lg w-full",)}/>
                             </div>
                         </div>
                         <div>
@@ -144,7 +161,7 @@ function AddEvent() {
                                 <h1 className="font-bold">Select End Day For Feeding:</h1>
                             </div>
                             <div className="flex p-1">
-                                <input id="end_day" disabled={isDisRep} type="date" min={new Date().toISOString().split("T")[0]} className={cn(isDateError?"ring-red-500 border-red-500":"focus:ring-blue-500 focus:border-blue-500", isDisRep?"text-gray-300":"text-gray-500", "bg-gray-50 border-gray-300 rounded-lg w-full",)}/>
+                                <input id="end_day" disabled={isDisRep} type="date" min={currentDate} className={cn(isDateError?"ring-red-500 border-red-500":"focus:ring-blue-500 focus:border-blue-500", isDisRep?"text-gray-300":"text-gray-500", "bg-gray-50 border-gray-300 rounded-lg w-full",)}/>
                             </div>
                         </div>
                     </div>
