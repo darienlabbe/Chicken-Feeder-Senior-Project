@@ -129,29 +129,28 @@ fs.watch(occur_path, () => {
     });
 });
 
-
-
 // Function to run immediatly when the backend is loaded but only once
 async function checkForOccur() {
     const currentTime = new dayjs.tz();
     const today_date = new dayjs.tz().get('year') + "-" + (dayjs.tz().get('month') + 1).toString().padStart(2, '0') + "-" + dayjs.tz().get('date').toString().padStart(2, '0');
 
+    // Check all items in the occurrence list
     occur_list.forEach((occur) => {
         if (today_date === occur.run_date.split('T')[0] && currentTime.get('hour').toString().padStart(2, '0') === occur.run_time.split(':')[0] && currentTime.get('minute').toString().padStart(2, '0') === occur.run_time.split(':')[1]) {
             // Trigger the relay
             console.log('Turn on the relay for', occur.amt_feed, 'secs');
-	    const amt_mil = occur.amt_feed * 1000;
-	    
-	    // Turn the relay on
-	    relay.writeSync(1);   
+            const amt_mil = occur.amt_feed * 1000;
+            
+            // Turn the relay on
+            relay.writeSync(1);   
 
-	    // Wait for the specified time
-	    setTimeout(() => {
-	        // Set the GPIO pin to '0' (low) after the specified time
-	        relay.writeSync(0);
-	    }, amt_mil);
+            // Wait for the specified time
+            setTimeout(() => {
+                // Turn the relay off after the specified amount of time
+                relay.writeSync(0);
+	        }, amt_mil);
         } else {
-            console.log('Time match not found.', currentTime.get('minute').toString().padStart(2, '0'), occur.run_time.split(':')[1]);
+            console.log('Time match not found.');
         }
     });
 }
@@ -166,8 +165,8 @@ async function runEveryCurrMin() {
     
     // Check if the current second is the start of a new minute
     if (sec === 0) {
-	// Function to run every minute	
-	await checkForOccur();
+	    // Function to run every minute	
+	    await checkForOccur();
     }
 }
 
@@ -178,24 +177,6 @@ setInterval(runEveryCurrMin, 1000); // Run every second
 io.on("connection", async (socket) => {
     // Send a message to client that a new user connected
     socket.emit("user connected", "A new user has connected");
-    io.emit("user connected");
-    var relayval = 0;	// For status control
-
-    socket.on('relay-on', function(data) { // Get on button status from client
-        relayval = data;
-        if (relayval != relay.readSync()) { // Only change if status has changed
-            relay.writeSync(relayval); // Turn motor on
-            io.emit("The relay is on", data); // Send to all clients
-            io.emit("motor-on");
-        }
-    });
-
-    socket.on('relay-off', function(data) { // Get off button status from client
-        relayval = 0;
-    	relay.writeSync(relayval); // Turn motor off
-        io.emit("The relay is off", data); // Send to all clients
-        io.emit("motor-off");
-    });
 
     // Get input values
     socket.on("new_feeding", async function(data) {
