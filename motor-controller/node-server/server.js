@@ -192,7 +192,7 @@ io.on("connection", async (socket) => {
         let id = 0;
 
         // Create variables for later data input
-	let now = dayjs.tz().get('year') + "-" + (dayjs.tz().get('month') + 1).toString().padStart(2, '0') + "-" + dayjs.tz().get('date').toString().padStart(2, '0');
+	    let now = dayjs.tz().get('year') + "-" + (dayjs.tz().get('month') + 1).toString().padStart(2, '0') + "-" + dayjs.tz().get('date').toString().padStart(2, '0');
         let future = (dayjs.tz().get('year') + 50) + "-" + (dayjs.tz().get('month') + 1).toString().padStart(2, '0') + "-" + dayjs.tz().get('date').toString().padStart(2, '0');
         let currentTime = dayjs.tz().get('hour').toString().padStart(2, '0') + ':' + dayjs.tz().get('minute').toString().padStart(2, '0') + ':' + dayjs.tz().get('second').toString().padStart(2, '0');
         
