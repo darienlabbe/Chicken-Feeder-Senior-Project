@@ -7,8 +7,10 @@ import { io } from "socket.io-client";
 import { Popover, PopoverHandler, PopoverContent, Button } from '@material-tailwind/react';
 import Loading from './loading';
 
+// Connection to the websockets
 const socket = io("http://localhost:3001");
 
+// Function for the button that handles deletion of events from the database
 function DeleteEvent() {
     // States for changing inputs and different style changes
     const [isDropError, setDropError] = useState(false);
@@ -17,6 +19,7 @@ function DeleteEvent() {
     const [idValue, setID] = useState(-1);
     const [isLoading, setLoading] = useState(false);
 
+    // Detect for loading and completion of loading events
     socket.on("loading", () => { setLoading(true); });
     socket.on("done_loading", () => { setLoading(false); });
 
@@ -34,13 +37,15 @@ function DeleteEvent() {
             setDropValue("--select one--");
             setID(-1);
         } else {
-            console.log("ERROR: Input an entry to delete!")
+            // If there is no selected event output an error
+            console.error("ERROR: Input an entry to delete!")
             setDropError(true);
         }
     }
 
     // Function for changing the value of the recurrence interval dropdown
     function drop(item) {
+        // If and else if for formatting when changing the dropdown value
         if (item.includes(".") && item.split(".")[2] !== undefined) {
             setDropValue((val) => val = item.split(".")[1] + "." + item.split(".")[2]);
             setIsOpen((prev) => !prev);
@@ -50,6 +55,7 @@ function DeleteEvent() {
             setIsOpen((prev) => !prev);
             setID(item.split(".")[0]);
         } else {
+            // Set the dropdown value to the selected item
             setDropValue((val) => val = item);
             setIsOpen((prev) => !prev);
         }
@@ -82,8 +88,8 @@ function DeleteEvent() {
                                     <div className="flex w-full p-1 hover:font-bold cursor-pointer" key={i}>
                                         <button onClick={() => drop(item.id + ". " + item.st_day.split("-")[1] + "/" + item.st_day.split("T")[0].split("-")[2] + "/" + item.st_day.split("-")[0] + " at " + item.st_time.split(":")[0] + ":" + item.st_time.split(":")[1] + " for " + item.amt_feed + "sec")} className="text-gray-500">{item.st_day.split("-")[1] + "/" + item.st_day.split("T")[0].split("-")[2] + "/" + item.st_day.split("-")[0] + " at " + item.st_time.split(":")[0] + ":" + item.st_time.split(":")[1] + " for " + item.amt_feed + "sec"}</button>
                                     </div>
-                                ))}
-                            </div>)}
+                                ))}</div>
+                            )}
                         </div>
                     </div>
                     <div className="pt-3">

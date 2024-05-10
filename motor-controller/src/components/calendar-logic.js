@@ -7,10 +7,11 @@ dayjs.extend(utc);
 dayjs.extend(tz);
 dayjs.tz.setDefault("America/Los_Angeles");
 
+// Generate the days in the 
 export const generateDate = (month = dayjs.tz().month(), year = dayjs.tz().year()) => {
+    // Get the first day and last day of the current month
     const firstDateOfMonth = dayjs.tz().year(year).month(month).startOf("month");
     const lastDateOfMonth = dayjs.tz().year(year).month(month).endOf("month");
-
     const arrayOfDate = [];
 
     // Generate prefix days
@@ -34,6 +35,7 @@ export const generateDate = (month = dayjs.tz().month(), year = dayjs.tz().year(
     return arrayOfDate;
 };
 
+// Array of full string for each month 
 export const months = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December",

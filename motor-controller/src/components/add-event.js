@@ -20,8 +20,10 @@ dayjs.extend(utc);
 dayjs.extend(tz);
 dayjs.tz.setDefault("America/Los_Angeles");
 
+// Connection to the websockets
 const socket = io("http://localhost:3001");
 
+// Function for the button that handles adding new events and creates the subsequent occurrences in the database
 function AddEvent() {
     // States for changing inputs and different style changes
     const [isDisImm, setDisImm] = useState(false);
@@ -32,9 +34,11 @@ function AddEvent() {
     const [dropValue, setDropValue] = useState("--select one--");
     const [isLoading, setLoading] = useState(false);
 
+    // Detect for loading and completion of loading events
     socket.on("loading", () => { setLoading(true); });
     socket.on("done_loading", () => { setLoading(false); });
 
+    // Get the current date (YYYY-MM-DD)
     const currentDate = dayjs.tz().get('year') + '-' + (dayjs.tz().get('month') + 1).toString().padStart(2, '0') + '-' + dayjs.tz().get('date').toString().padStart(2, '0');
 
     // Function for submitting the data to the backend
@@ -57,6 +61,7 @@ function AddEvent() {
                 let date1 = dayjs.tz().set('year', start_day.split('-')[0]).set('month', start_day.split('-')[1] - 1).set('date', start_day.split('-')[2]);
                 let date2 = dayjs.tz().set('year', end_day.split('-')[0]).set('month', end_day.split('-')[1] - 1).set('date', end_day.split('-')[2]);
                 if (date1 > date2) {
+                    // If the start date occurs after the end date, output an error and set the date error state
                     console.error("ERROR: You must input a start date that occurs before the end date!");
                     setDateError(true);
                     return;
@@ -84,6 +89,7 @@ function AddEvent() {
             setDropValue("--select one--");
             setDateError(false);
         } else {
+            // If no recurrence interval is provided then output an error and set the error states
             console.error("ERROR: Input a recurrence interval!")
             setDropError(true);
             setDateError(false);

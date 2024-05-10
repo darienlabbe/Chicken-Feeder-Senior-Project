@@ -12,6 +12,7 @@ dayjs.extend(utc);
 dayjs.extend(tz);
 dayjs.tz.setDefault("America/Los_Angeles");
 
+// Function for the calendar component
 function Calendar() {
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const currentDate = dayjs.tz();
@@ -73,5 +74,5 @@ function Calendar() {
     </div>
   );
 }
-// "Feeding at: " + occur[i].run_time + " for " + occur[i].amt_feed + " seconds"
+
 export default Calendar;
