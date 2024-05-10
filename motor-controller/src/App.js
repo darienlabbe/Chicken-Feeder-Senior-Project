@@ -6,6 +6,7 @@ import { io } from "socket.io-client";
 
 const socket = io("http://localhost:3001");
 
+// Function for the full put together app
 function App() { 
   useEffect(() => {
     // Event listener
@@ -18,7 +19,7 @@ function App() {
 
     return () => {
       // Remove event listener
-      socket.off("connect");
+      socket.off("disconnection");
     }
   }, []);
   
